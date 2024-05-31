@@ -229,7 +229,7 @@ def weighted_lasso_bcd_screening(X, y, lbd, nbitermax=10000,
     return w, nb_screened[:i], screened, rho, correl
 
 
-def weighted_prox_lasso_bcd_screening(X, y, lbd, w_0=np.array([]),alpha=1e9, nbitermax=10000,
+def weighted_prox_lasso_bcd_screening(X, y, lbd, w_0=np.array([]),alpha=1e3, nbitermax=10000,
                                       winit=np.array([]),
                                       screen_init=np.array([]), screen_frq=3,
                                       dual_gap_tol=1e-6,do_screen = True):
@@ -273,7 +273,7 @@ def weighted_prox_lasso_bcd_screening(X, y, lbd, w_0=np.array([]),alpha=1e9, nbi
     while i < nbitermax and gap > dual_gap_tol:
         for k in range(n_features):
             if not screened[k]:
-                # Updating the variable
+                # Updating the variable 
                 # computing the partial residual through update of the residual
                 xk = X[:, k]
                 s = rho + (xk * w[k])
