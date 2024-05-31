@@ -148,6 +148,8 @@ if __name__ == '__main__':
                         opt_mm = 'gap_{:1.0e}_screen_{:d}'.format(dual_gap_inner,
                                                                   screen_frq)
                         filename = filename + opt_mm
+                        filenametxt = filename + "alpha1e10.txt"
+                        filetxt = open(filenametxt, "w")
                         print(filename)
                         timing = np.zeros([len(Tvec), len(thetavec), n_iter])
                         optimality = np.zeros([len(Tvec), len(thetavec), n_iter])
@@ -156,7 +158,6 @@ if __name__ == '__main__':
                         cost = np.zeros([len(Tvec), len(thetavec), n_iter])
         
                         for i in range(n_iter):
-                            print("\ni", i)
                             np.random.seed(i)
                             X, y, wopt = generate_random_gaussian(n_samples,
                                                                   n_features,
@@ -165,6 +166,7 @@ if __name__ == '__main__':
                             lambdamax = np.max(np.abs(np.dot(X.transpose(), y)))
                             lambdavec = lambdamax * Tvec
                             print(lambdavec)
+                            filetxt.write(str(lambdavec))
                             for i_theta, theta in enumerate(thetavec):
                                 lambdavec /= np.log(1 + 1 / theta)
                                 if i_theta == 0:
@@ -185,16 +187,14 @@ if __name__ == '__main__':
                                           np.sum(timing[:, :, i]),
                                           f_meas[i_lambd, i_theta, i],
                                           optimality[i_lambd, i_theta, i])
-                            def printtxt(filename, data):
-                                with open(filename, 'w') as f:
-                                    for i in range(data.shape[0]):
-                                        np.savetxt(filename, data[i], fmt='%d')
-                                    f.write("\n")
+                                    filetxt.write('{} {} {} {} {} {} {}\n'.format(
+                                        i, 
+                                        theta, 
+                                        lambd, 
+                                        run_time, 
+                                        np.sum(timing[:, :, i]), 
+                                        f_meas[i_lambd, i_theta, i], 
+                                        optimality[i_lambd, i_theta, i]
+                                    ))
                             np.savez(filename, timing=timing, optimality=optimality,
                                      maxi=maxi, f_meas=f_meas, cost=cost)
-                            printtxt(filename+'timing.txt', timing)
-                            #np.savetxt(filename+'optimality.txt', optimality, fmt='%d',delimiter=',')
-                            #np.savetxt(filename+'maxi.txt', maxi, fmt='%d',delimiter=',')
-                            #np.savetxt(filename+'f_meas.txt', f_meas, fmt='%d',delimiter=',')
-                            #np.savetxt(filename+'cost.txt', cost, fmt='%d',delimiter=',')
-
