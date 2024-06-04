@@ -229,7 +229,7 @@ def weighted_lasso_bcd_screening(X, y, lbd, nbitermax=10000,
     return w, nb_screened[:i], screened, rho, correl
 
 
-def weighted_prox_lasso_bcd_screening(X, y, lbd, w_0=np.array([]),alpha=1e13, nbitermax=10000,
+def weighted_prox_lasso_bcd_screening(X, y, lbd, w_0=np.array([]),alpha=1e10, nbitermax=10000,
                                       winit=np.array([]),
                                       screen_init=np.array([]), screen_frq=3,
                                       dual_gap_tol=1e-6,do_screen = True):

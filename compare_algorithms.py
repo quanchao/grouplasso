@@ -148,7 +148,7 @@ if __name__ == '__main__':
                         opt_mm = 'gap_{:1.0e}_screen_{:d}'.format(dual_gap_inner,
                                                                   screen_frq)
                         filename = filename + opt_mm
-                        filenametxt = filename + "alpha1e11.txt"
+                        filenametxt = filename + "alpha1e10.txt"
                         filetxt = open(filenametxt, "w")
                         print(filename)
                         timing = np.zeros([len(Tvec), len(thetavec), n_iter])
