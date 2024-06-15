@@ -134,8 +134,8 @@ if __name__ == '__main__':
     dual_gap_inner = 1e-4
     screen_frq = 10
     path_results = './'
-    algo_list = ['bcd', 'gist', 'mm_screening_genuine', 'mm_screening_2']
-
+    # algo_list = ['bcd', 'gist', 'mm_screening_genuine', 'mm_screening_2']
+    algo_list =  ['mm_screening_2']
     
     dual_gap_inner = 1e-4
     
@@ -144,12 +144,11 @@ if __name__ == '__main__':
             print('running {}'.format(algo))
             for n_samples, n_features in zip(n_samplesvec, n_featuresvec):
                     for n_informative in n_informativevec:
-                        filename = path_results + '{}_n_samples{:d}_n_feat{:d}_n_inform{:d}_bruit{:2.2f}_N{:d}_tol{:2.5e}'.format(algo,n_samples,n_features,n_informative,sigma_bruit,N,tol)
+                        filename = path_results + "./alpha=308.50/" + '{}_n_samples{:d}_n_feat{:d}_n_inform{:d}_bruit{:2.2f}_N{:d}_tol{:2.5e}'.format(algo,n_samples,n_features,n_informative,sigma_bruit,N,tol)
                         opt_mm = 'gap_{:1.0e}_screen_{:d}'.format(dual_gap_inner,
                                                                   screen_frq)
-                        filename = filename + opt_mm
-                        filenametxt = filename + "alpha1e10.txt"
-                        filetxt = open(filenametxt, "w")
+                        filename = filename + opt_mm +".txt"
+                        filetxt = open(filename, "w")
                         print(filename)
                         timing = np.zeros([len(Tvec), len(thetavec), n_iter])
                         optimality = np.zeros([len(Tvec), len(thetavec), n_iter])
@@ -187,14 +186,19 @@ if __name__ == '__main__':
                                           np.sum(timing[:, :, i]),
                                           f_meas[i_lambd, i_theta, i],
                                           optimality[i_lambd, i_theta, i])
-                                    filetxt.write('{} {} {} {} {} {} {}\n'.format(
+                                    rho = y - X.dot(w)
+                                    gap =  np.linalg.norm(rho, axis=0, ord=2)**2 + np.dot(lambd, w)
+                                    print("gap", gap)
+
+                                    filetxt.write('{} {} {} {} {} {} {} {}\n'.format(lambd, 
                                         i, 
                                         theta, 
                                         lambd, 
                                         run_time, 
                                         np.sum(timing[:, :, i]), 
                                         f_meas[i_lambd, i_theta, i], 
-                                        optimality[i_lambd, i_theta, i]
+                                        optimality[i_lambd, i_theta, i],
+                                        gap
                                     ))
                             np.savez(filename, timing=timing, optimality=optimality,
                                      maxi=maxi, f_meas=f_meas, cost=cost)
