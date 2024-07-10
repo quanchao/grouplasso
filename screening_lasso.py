@@ -65,7 +65,7 @@ def compute_duality_gap_lasso(X, y, w, lbd):
         return gap, rho, correl, nu
 
 
-def compute_duality_gap_prox_lasso(X, y, w, lbd, w_0, alpha):
+def compute_duality_gap_prox_lasso(X, y, w, lbd, w_0):
         """Compute duality gap for prox_Lasso."""
         if type(lbd) is not np.array:
             lbd = np.ones(X.shape[1]) * lbd
@@ -74,29 +74,24 @@ def compute_duality_gap_prox_lasso(X, y, w, lbd, w_0, alpha):
 
         if not isspmatrix(X):
             normrho2 = np.linalg.norm(rho, axis=0, ord=2)**2
-            primalcost = 0.5 * normrho2 + np.sum(np.abs(w) * lbd) + \
-                0.5 / alpha * np.sum((w - w_0)**2)
+            primalcost = 0.5 * normrho2 + np.sum(np.abs(w) * lbd) 
         else:
             normrho2 = spnorm(rho, axis=0)**2
             primalcost = 0.5 * normrho2 + (abs(w*lbd).sum())
-        v = (w - w_0) / alpha
         correl = X.T.dot(rho)
 
-        max_viol = np.max(np.abs(correl - v) / lbd)
+        max_viol = np.max(np.abs(correl) / lbd)
 
         if max_viol > 1:
             nu = rho / max_viol
-            v = v / max_viol
         else:
             nu = rho
         if not isspmatrix(X):
-            dualcost = - 0.5 * np.sum(nu * nu) + np.sum(nu * y) - \
-                v.T.dot(w_0) - alpha / 2 * np.sum(v**2)
+            dualcost = - 0.5 * np.sum(nu * nu) + np.sum(nu * y) 
         else:
-            dualcost = -0.5 * spnorm(nu)**2 + (nu.multiply(y)).sum() - \
-                v.T.dot(w_0) - alpha / 2 * np.sum(v**2)
+            dualcost = -0.5 * spnorm(nu)**2 + (nu.multiply(y)).sum()
         gap = primalcost - dualcost
-        return gap, rho, correl, nu, v
+        return gap, rho, correl, nu
 
 
 def check_opt_prox_lasso(X, y, w, lbd, w_0, alpha, tol=1e-4):
@@ -229,7 +224,7 @@ def weighted_lasso_bcd_screening(X, y, lbd, nbitermax=10000,
     return w, nb_screened[:i], screened, rho, correl
 
 
-def weighted_prox_lasso_bcd_screening(X, y, lbd, w_0=np.array([]),alpha=1e308, nbitermax=10000,
+def weighted_prox_lasso_bcd_screening(X, y, lbd, w_0=np.array([]), nbitermax=10000,
                                       winit=np.array([]),
                                       screen_init=np.array([]), screen_frq=3,
                                       dual_gap_tol=1e-6,do_screen = True):
@@ -277,22 +272,22 @@ def weighted_prox_lasso_bcd_screening(X, y, lbd, w_0=np.array([]),alpha=1e308, n
                 # computing the partial residual through update of the residual
                 xk = X[:, k]
                 s = rho + (xk * w[k])
-                Xts = (xk.T.dot(s) + w_0[k] / alpha)
-                wp = prox_l1(Xts, lbd[k]) / (normX[k]**2 + 1 / alpha)
+                Xts = 0
+                wp = prox_l1(Xts, lbd[k]) / (normX[k]**2)
                 rho = rho - xk * (wp - w[k])
                 w[k] = wp
-        gap, rho, correl, nu, v = compute_duality_gap_prox_lasso(X, y, w, lbd,
-                                                                 w_0, alpha)
+        gap, rho, correl, nu = compute_duality_gap_prox_lasso(X, y, w, lbd,
+                                                                 w_0)
         if i % screen_frq == 0 and do_screen:
             # Updating screeening
             for k in range(n_features):
                     if not screened[k]:
-                        bound = (normX[k] + 1 / alpha) * np.sqrt(2 * gap)
+                        bound = (normX[k]) * np.sqrt(2 * gap)
                         if not bool_sparse:
                             rhotxk = np.sum(nu * X[:, k])
                         else:
                             rhotxk = nu.multiply(X[:, k]).sum()
-                        screened[k] = ((abs(rhotxk - v[k]) + bound) < lbd[k])
+                        screened[k] = ((abs(rhotxk) + bound) < lbd[k])
             nb_screened[i] = (sum(screened == 1))
         else:
             nb_screened[i] = nb_screened[i - 1]

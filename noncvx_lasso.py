@@ -87,6 +87,7 @@ def current_cost(X, y, w, lbd, theta, reg=reg_lsp):
         where reg is nonconvex regularizer
     """
     normres2 = norm(y - X.dot(w))**2
+    print("lbd..", lbd)
     return 0.5 * normres2 + lbd * reg(w, theta)
 
 

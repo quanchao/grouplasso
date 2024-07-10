@@ -144,7 +144,7 @@ if __name__ == '__main__':
             print('running {}'.format(algo))
             for n_samples, n_features in zip(n_samplesvec, n_featuresvec):
                     for n_informative in n_informativevec:
-                        filename = path_results + "./alpha=308.50/" + '{}_n_samples{:d}_n_feat{:d}_n_inform{:d}_bruit{:2.2f}_N{:d}_tol{:2.5e}'.format(algo,n_samples,n_features,n_informative,sigma_bruit,N,tol)
+                        filename = path_results + "./noalpha/" + '{}_n_samples{:d}_n_feat{:d}_n_inform{:d}_bruit{:2.2f}_N{:d}_tol{:2.5e}'.format(algo,n_samples,n_features,n_informative,sigma_bruit,N,tol)
                         opt_mm = 'gap_{:1.0e}_screen_{:d}'.format(dual_gap_inner,
                                                                   screen_frq)
                         filename = filename + opt_mm +".txt"
@@ -171,8 +171,11 @@ if __name__ == '__main__':
                                 if i_theta == 0:
                                     w_init = []
                                 else:
+                                    print("W_init", w_init)
                                     w_init = w_th.copy()
+                                print("lambdavec len", len(lambdavec))
                                 for i_lambd, lambd in enumerate(lambdavec):
+                                    print("lambda", lambd)
                                     w, run_time = run_algo(X, y, lambd, theta, algo,
                                                            tol, dual_gap_inner,
                                                            screen_frq, w_init)
@@ -187,10 +190,12 @@ if __name__ == '__main__':
                                           f_meas[i_lambd, i_theta, i],
                                           optimality[i_lambd, i_theta, i])
                                     rho = y - X.dot(w)
-                                    gap =  np.linalg.norm(rho, axis=0, ord=2)**2 + np.dot(lambd, w)
+                                    gap =  0.5* np.linalg.norm(rho)**2
+                                    cost1 = gap + lambd * reg_lsp(w, theta)
+
                                     print("gap", gap)
 
-                                    filetxt.write('{} {} {} {} {} {} {} {}\n'.format(lambd, 
+                                    filetxt.write('i={} {} {} {} {} {} {} {} {} cost = {}, cost1={}\n'.format(
                                         i, 
                                         theta, 
                                         lambd, 
@@ -198,7 +203,11 @@ if __name__ == '__main__':
                                         np.sum(timing[:, :, i]), 
                                         f_meas[i_lambd, i_theta, i], 
                                         optimality[i_lambd, i_theta, i],
-                                        gap
+                                        gap,
+                                        f_meas[i_lambd, i_theta, i],
+                                        cost[i_lambd, i_theta, i],
+                                        cost1
                                     ))
+                                    filetxt.write("\n")
                             np.savez(filename, timing=timing, optimality=optimality,
                                      maxi=maxi, f_meas=f_meas, cost=cost)
